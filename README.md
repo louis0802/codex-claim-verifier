@@ -2,7 +2,7 @@
 
 Evidence-backed execution claim verification for OpenAI Codex.
 
-**v0.2.0 — Public Preview.** Distributed through GitHub; **not published to npm**.
+**v0.2.1 — Public Preview.** Distributed through GitHub; **not published to npm**.
 Manual hook trust, trusted-session acceptance, and live Desktop verification
 remain pending. See [Known limitations](#known-limitations).
 
@@ -32,7 +32,7 @@ access is required for that Python installation.
 Install directly from the GitHub release asset:
 
 ```sh
-CLAIM_VERIFIER_PACKAGE='https://github.com/louis0802/codex-claim-verifier/releases/download/v0.2.0/claim-verifier-0.2.0.tgz'
+CLAIM_VERIFIER_PACKAGE='https://github.com/louis0802/codex-claim-verifier/releases/download/v0.2.1/claim-verifier-0.2.1.tgz'
 npx --yes --package "$CLAIM_VERIFIER_PACKAGE" claim-verifier setup
 ```
 
@@ -59,7 +59,7 @@ real activity occur, `WAITING FOR HOOK REVIEW` is expected.
 
 If a global npm prefix is unwritable, setup reports the installation failure and
 prefix; it does not edit your shell profile. New users may need to sign in to Codex.
-To verify a downloaded asset, use the release's [checksums.txt](https://github.com/louis0802/codex-claim-verifier/releases/download/v0.2.0/checksums.txt).
+To verify a downloaded asset, use the release's [checksums.txt](https://github.com/louis0802/codex-claim-verifier/releases/download/v0.2.1/checksums.txt).
 
 ## How it works
 
@@ -163,7 +163,7 @@ repository marketplace installation is an alternative source:
 
 ```sh
 npx --yes --package "$CLAIM_VERIFIER_PACKAGE" claim-verifier setup \
-  --source louis0802/codex-claim-verifier --plugin-version v0.2.0 --upgrade
+  --source louis0802/codex-claim-verifier --plugin-version v0.2.1 --upgrade
 ```
 
 Explicit sources are registered through Codex's marketplace tooling. Pinning a
@@ -204,10 +204,23 @@ semantic extraction. Project overrides in `.codex/claim-verifier.toml` are read
 only for projects already trusted in Codex's user configuration. The plugin's
 settings do not grant project trust.
 
+## Setup diagnostics
+
+Setup records the observed Codex version. If a read-only plugin listing exits
+successfully but returns malformed JSON, setup retries once, then fails with a
+manual retry command. It does not infer unsupported CLI versions from parse
+failures or extract JSON fragments from noisy text. `setup --verbose` includes
+bounded, secret-redacted stdout/stderr prefixes and exit status. Mutations are
+not retried automatically; ambiguous marketplace-add output requires inspecting
+current state before rerunning setup.
+
 ## Audit receipts
 
 Structured Stop audits and rendered receipts are stored locally. `audit latest`
-shows the most recent audit; `audit list` lists saved audits. `adaptive` stores a
+shows the most recent audit and its exact stored verifier-owned receipt; `audit list` lists saved audits.
+Use `audit latest --json` for structured claims and footer metadata. Older audits
+without receipts remain readable. Delivery metadata records an attempted channel,
+not confirmed visible rendering. Audit inspection performs no model calls or re-verification. `adaptive` stores a
 compact PASS receipt and expands problem receipts:
 
 ```text
@@ -246,7 +259,8 @@ Keep sensitive material out of test prompts and command arguments.
 ## Known limitations
 
 - **Hook trust:** installation does not trust lifecycle hooks. Manual `/hooks`
-  review and a trusted-session smoke remain pending for this Public Preview.
+  review is required. A prior fake-claim case is user-reported; fresh v0.2.1
+  checked-run acceptance and doctor READY remain pending.
 - **Bash exit status:** some plain Codex Bash hook results omit it. Authoritative
   test/build/lint/typecheck evidence may require the agent-invoked `checked_run`
   helper. From the installed plugin root, use
@@ -273,6 +287,12 @@ Portable Python pins and retained upstream notices are in [THIRD_PARTY.md](THIRD
 
 ## Testing
 
+Automated baseline for this candidate: **96 passing tests** (63 Python, 33 Node).
+Local distribution checks passed separately on stable Codex 0.157.1 and alpha
+0.158.0-alpha.2.1, including a public 0.2.0 → local 0.2.1 upgrade. Public 0.2.1
+download verification and fresh trusted CLI acceptance remain pending. Desktop
+trusted lifecycle remains pending; these are distinct from automated coverage.
+
 ```sh
 python3 -B -m unittest discover -s tests -v
 npm test
@@ -281,7 +301,7 @@ npm pack --dry-run --json
 ```
 
 Validate this plugin root with the Codex Plugin Creator's `validate_plugin.py`.
-The [verification record](docs/changes/github-public-preview/verification.md)
+The [v0.2.1 verification record](docs/changes/claim-verifier-0.2.1/verification.md)
 distinguishes automated/synthetic checks, actual Codex setup, public distribution,
 and manual trusted-session acceptance. No interactive hook trust runs in CI.
 
@@ -293,7 +313,8 @@ After manual trust, use a fresh task for each live acceptance case:
    `TEST_SUCCESS`, `VERIFIED`, and `PASS` when they succeed.
 3. Run doctor after all three hooks and a Stop audit. Expect `READY`.
 
-These live trusted-session cases are pending. Synthetic tests establish verifier
+The prior fake-claim case is recorded as user-reported evidence. Fresh v0.2.1
+trusted checked-run and READY checks are pending. Synthetic tests establish verifier
 logic, not Codex trust or live client delivery.
 
 ## License
