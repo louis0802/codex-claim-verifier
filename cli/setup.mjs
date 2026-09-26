@@ -3,7 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { createInterface } from 'node:readline/promises';
 import { ROOT, safePath, privateDir, regular, atomic, which, checked, manifest, runtimeFiles, identity,
-  installed, listing, bridge, parseJSON, renderDoctor } from './system.mjs';
+  installed, listing, bridge, codexJSON, renderDoctor } from './system.mjs';
 import { ensurePython, findPython } from './python.mjs';
 
 export function validateSource(source, version) {
@@ -67,6 +67,7 @@ export function ensureCodex(ctx) {
     }
   }
   const version = checked(executable, ['--version'], ctx, {timeout: 10_000}).stdout.trim();
+  ctx.codexVersion = version || 'unavailable';
   ctx.output(`✓ ${version || 'Codex CLI found'}`);
   return executable;
 }
@@ -122,7 +123,7 @@ export function installPlugin(ctx, flags, existing, source) {
   if (source) {
     const args = ['plugin', 'marketplace', 'add', source.source, '--json'];
     if (source.remote && flags.pluginVersion) args.push('--ref', flags.pluginVersion);
-    const value = parseJSON(checked(ctx.codex, args, ctx).stdout, 'Codex marketplace add');
+    const value = codexJSON(ctx, args, 'Codex marketplace add');
     const name = source.name || value.marketplaceName || value.name || value.marketplace?.name;
     if (!/^[A-Za-z0-9_-]+$/.test(name || '')) throw new Error('Codex did not return a valid marketplace name. Run codex plugin marketplace list.');
     selector = `claim-verifier@${name}`;

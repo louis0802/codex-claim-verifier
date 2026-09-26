@@ -290,6 +290,14 @@ test('real hook launcher processes activate installed package, doctor reaches RE
   assert.equal(await main(['doctor'], f.ctx), 0);
   assert.equal(await main(['audit', 'latest'], f.ctx), 0);
   f.output.length = 0;
+  assert.equal(await main(['audit', 'latest', '--json'], f.ctx), 0);
+  const audit = JSON.parse(f.output.join(''));
+  assert.equal(audit.result, 'PASS');
+  assert.ok(audit.footer.rendered.includes('Claim Verifier'));
+  f.output.length = 0;
+  assert.equal(await main(['audit', 'latest'], f.ctx), 0);
+  assert.ok(f.output.join('\n').includes(audit.footer.rendered));
+  f.output.length = 0;
   await setup(f.ctx, {});
   assert.ok(f.output.join('\n').includes('READY'));
   assert.ok(!f.output.join('\n').includes('ACTION REQUIRED'));
@@ -326,4 +334,84 @@ test('npm bin symlink executes the CLI entry point', t => {
   const result = spawnSync(process.execPath, [bin, '--help'], {encoding: 'utf8'});
   assert.equal(result.status, 0, result.stderr);
   assert.ok(result.stdout.includes('Commands: setup, doctor'));
+});
+
+test('setup retries transient exit-zero invalid JSON once and continues', async t => {
+  const f = fixture(t); const original = f.ctx.run; let lists = 0;
+  f.ctx.run = (command, args, extra) => {
+    if (args.join(' ') === 'plugin list --json' && ++lists === 1) return {status: 0, stdout: 'Initializing Codex…', stderr: ''};
+    return original(command, args, extra);
+  };
+  assert.equal(await setup(f.ctx, {}), 0);
+  assert.equal(lists, 3); // two initial attempts, one post-install inspection
+  assert.equal(f.calls.filter(call => call[2] === 'add').length, 1);
+});
+
+test('persistent invalid JSON names observed version and redacts bounded verbose output', async t => {
+  const f = fixture(t); const original = f.ctx.run; let lists = 0;
+  f.ctx.verbose = true; f.ctx.env.GITHUB_TOKEN = 'fixture-sensitive-value';
+  f.ctx.run = (command, args, extra) => {
+    if (args.join(' ') === 'plugin list --json') {
+      lists++; return {status: 0, stdout: 'fixture-sensitive-value ' + 'x'.repeat(10000), stderr: 'fixture-sensitive-value'};
+    }
+    return original(command, args, extra);
+  };
+  await assert.rejects(setup(f.ctx, {}), error => {
+    assert.match(error.message, /did not return parseable JSON/);
+    assert.match(error.message, /codex-cli fixture/);
+    assert.match(error.message, /codex plugin list --json/);
+    assert.match(error.message, /stdout prefix/);
+    assert.match(error.message, /stderr prefix/);
+    assert.match(error.message, /exit status: 0/);
+    assert.ok(!error.message.includes('fixture-sensitive-value'));
+    assert.ok(!error.message.includes('supporting plugin JSON'));
+    assert.ok(error.message.length < 6000); return true;
+  });
+  assert.equal(lists, 2);
+});
+
+test('nonzero plugin list is never retried', async t => {
+  const f = fixture(t); const original = f.ctx.run; let lists = 0;
+  f.ctx.run = (command, args, extra) => {
+    if (args.join(' ') === 'plugin list --json') { lists++; return {status: 7, stdout: '', stderr: 'failed'}; }
+    return original(command, args, extra);
+  };
+  await assert.rejects(setup(f.ctx, {}), /Command failed: codex plugin list/);
+  assert.equal(lists, 1);
+});
+
+test('public audit latest JSON returns structured footer and restricts JSON option', async t => {
+  const f = fixture(t); await setup(f.ctx, {});
+  const original = f.ctx.run;
+  const audit = {result: 'CORRECT', claims: [], footer: {rendered: 'stored receipt', channel: 'systemMessage'}};
+  f.ctx.run = (command, args, extra) => args.includes('audit-latest')
+    ? {status: 0, stdout: JSON.stringify({text: 'formatted', audit}), stderr: ''} : original(command, args, extra);
+  f.output.length = 0;
+  assert.equal(await main(['audit', 'latest', '--json'], f.ctx), 0);
+  assert.deepEqual(JSON.parse(f.output.join('')), audit);
+  assert.throws(() => parse(['setup', '--json']), /json/i);
+});
+
+test('ambiguous marketplace mutation runs once and requests inspection', async t => {
+  const f = fixture(t); const original = f.ctx.run; let adds = 0;
+  f.ctx.run = (command, args, extra) => {
+    if (args.slice(0, 3).join(' ') === 'plugin marketplace add') {
+      adds++; return {status: 0, stdout: 'maybe installed', stderr: ''};
+    }
+    return original(command, args, extra);
+  };
+  await assert.rejects(setup(f.ctx, {source: 'owner/repo'}), /may have changed state[\s\S]*Inspect codex plugin marketplace list/);
+  assert.equal(adds, 1);
+  assert.ok(!f.calls.some(call => call[1] === 'plugin' && call[2] === 'add'));
+});
+
+test('read-only marketplace JSON retry keeps exact parsing and rejects noisy framing', async () => {
+  const {codexJSON} = await import('../../cli/system.mjs');
+  let calls = 0;
+  const ctx = {codex: 'codex', codexVersion: 'codex-cli fixture', env: {},
+    run: () => ({status: 0, stdout: ++calls === 1 ? 'notice\n{}' : '{}', stderr: ''})};
+  assert.deepEqual(codexJSON(ctx, ['plugin', 'marketplace', 'list', '--json'], 'Codex marketplaces'), {});
+  assert.equal(calls, 2);
+  ctx.run = () => ({status: 0, stdout: 'notice\n{"installed":[]}', stderr: ''});
+  assert.throws(() => codexJSON(ctx, ['plugin', 'list', '--json'], 'Codex plugins'), /did not return parseable JSON/);
 });

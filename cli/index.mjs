@@ -10,7 +10,7 @@ import { setup, selectedPlugin } from './setup.mjs';
 export function parse(argv) {
   const flags = {};
   const words = [];
-  const names = {'--verbose': 'verbose', '--no-launch': 'noLaunch', '--upgrade': 'upgrade', '--yes': 'yes', '--dry-run': 'dryRun'};
+  const names = {'--json': 'json', '--verbose': 'verbose', '--no-launch': 'noLaunch', '--upgrade': 'upgrade', '--yes': 'yes', '--dry-run': 'dryRun'};
   for (let index = 0; index < argv.length; index++) {
     const word = argv[index];
     if (names[word]) flags[names[word]] = true;
@@ -27,7 +27,8 @@ export function parse(argv) {
   if (!['setup', 'doctor', 'audit', 'version', 'help'].includes(command)) throw new Error(`Unknown command: ${command}`);
   if (command === 'audit' && (!['latest', 'list'].includes(words[1]) || words.length !== 2)) throw new Error('Use claim-verifier audit latest or audit list.');
   if (command !== 'audit' && words.length > 1) throw new Error('Unexpected command arguments.');
-  if (command !== 'setup' && Object.keys(flags).some(key => !['verbose', 'help'].includes(key))) throw new Error('Setup options are only valid for setup.');
+  if (flags.json && !(command === 'audit' && words[1] === 'latest')) throw new Error('--json is only valid for audit latest.');
+  if (command !== 'setup' && Object.keys(flags).some(key => !['verbose', 'help', 'json'].includes(key))) throw new Error('Setup options are only valid for setup.');
   return {command, subcommand: words[1], flags};
 }
 export async function main(argv = process.argv.slice(2), overrides = {}) {
@@ -36,7 +37,7 @@ export async function main(argv = process.argv.slice(2), overrides = {}) {
     arch: process.arch, nodeVersion: process.versions.node, tty: Boolean(process.stdin.isTTY && process.stdout.isTTY),
     run, output: console.log, verbose: Boolean(flags.verbose), ...overrides};
   if (flags.help || command === 'help') {
-    ctx.output('Claim Verifier\n\nCommands: setup, doctor, audit latest, audit list, version\n\nSetup flags: --verbose --no-launch --upgrade --yes --dry-run\nSources: --source <marketplace-root|owner/repo|https-git-url> [--plugin-version <ref>]\nPublic Preview: use npx --package <GitHub release tarball URL> claim-verifier setup');
+    ctx.output('Claim Verifier\n\nCommands: setup, doctor, audit latest [--json], audit list, version\n\nSetup flags: --verbose --no-launch --upgrade --yes --dry-run\nSources: --source <marketplace-root|owner/repo|https-git-url> [--plugin-version <ref>]\nPublic Preview: use npx --package <GitHub release tarball URL> claim-verifier setup');
     return 0;
   }
   if (command === 'setup') return setup(ctx, flags);
@@ -59,7 +60,7 @@ export async function main(argv = process.argv.slice(2), overrides = {}) {
     return status.exit_code;
   }
   const result = bridge(ctx, `audit-${subcommand}`);
-  if (subcommand === 'latest') ctx.output(result.text);
+  if (subcommand === 'latest') ctx.output(flags.json ? JSON.stringify(result.audit, null, 2) : result.text);
   else {
     ctx.output('Claim Verifier — Audits');
     if (!result.audits.length) ctx.output('No audits found.');

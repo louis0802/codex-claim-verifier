@@ -52,16 +52,55 @@ export function run(command, args, options = {}) {
     shell: false, env: process.env, ...options});
   return {status: result.status ?? 2, stdout: result.stdout || '', stderr: result.stderr || '', error: result.error};
 }
+export function diagnosticText(value, ctx, limit = 2000) {
+  let text = String(value ?? '');
+  // Redact before truncating so a boundary cannot disclose a partial secret.
+  for (const [key, secret] of Object.entries(ctx.env || {})) {
+    if (/token|secret|password|passwd|credential|api.?key|authorization/i.test(key) && secret) {
+      text = text.split(String(secret)).join('[REDACTED]');
+    }
+  }
+  text = text.replace(/(?:gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+|sk-[A-Za-z0-9_-]+)/g, '[REDACTED]')
+    .replace(/(bearer\s+)\S+/gi, '$1[REDACTED]')
+    .replace(/((?:token|password|secret|api[_-]?key)\s*[=:]\s*)[^\s,;]+/gi, '$1[REDACTED]')
+    .replace(/[\x00-\x08\x0b-\x1f\x7f]/g, '');
+  return text.slice(0, limit) + (text.length > limit ? '… [truncated]' : '');
+}
+function captured(result, command, args, ctx) {
+  return `\ncommand: ${diagnosticText([path.basename(command), ...args].join(' '), ctx)}\nexit status: ${result.status}` +
+    `\nstdout prefix: ${diagnosticText(result.stdout, ctx)}\nstderr prefix: ${diagnosticText(result.stderr || result.error?.message, ctx)}`;
+}
+function versionDetail(ctx) {
+  return ctx.codexVersion ? `\nCodex version: ${diagnosticText(ctx.codexVersion, ctx, 200)}` : '';
+}
 export function checked(command, args, ctx, options = {}) {
   const result = ctx.run(command, args, options);
   if (result.status !== 0) {
-    const details = ctx.verbose ? `\n${result.stderr || result.stdout || result.error?.message || ''}` : '';
-    throw new Error(`Command failed: ${path.basename(command)} ${args.join(' ')}.${details}\nRun it manually, then rerun the GitHub release setup command.`);
+    throw new Error(`Command failed: ${diagnosticText([path.basename(command), ...args].join(' '), ctx)}.` +
+      versionDetail(ctx) + (ctx.verbose ? captured(result, command, args, ctx) : '') +
+      '\nRun it manually, then rerun the GitHub release setup command.');
   }
   return result;
 }
 export function parseJSON(output, label) {
-  try { return JSON.parse(output); } catch { throw new Error(`${label} returned invalid JSON. Use a Codex version supporting plugin JSON commands.`); }
+  try { return JSON.parse(output); } catch { throw new Error(`${label} did not return parseable JSON.`); }
+}
+export function codexJSON(ctx, args, label) {
+  const readOnly = ['plugin list --json', 'plugin marketplace list --json'].includes(args.join(' '));
+  if (!ctx.codexVersion) {
+    const version = ctx.run(ctx.codex, ['--version'], {timeout: 10_000});
+    ctx.codexVersion = version.status === 0 ? version.stdout.trim() : 'unavailable';
+  }
+  let result;
+  for (let attempt = 0; attempt < (readOnly ? 2 : 1); attempt++) {
+    result = checked(ctx.codex, args, ctx, {timeout: 30_000});
+    try { return JSON.parse(result.stdout); } catch {}
+  }
+  const next = readOnly ? `Retry:\n  codex ${args.join(' ')}` :
+    'The command may have changed state. Inspect codex plugin marketplace list --json and codex plugin list --json before retrying setup.';
+  throw new Error(`${label} did not return parseable JSON.\n${versionDetail(ctx)}\n\n${next}` +
+    '\nRun setup with --verbose to inspect captured output.' +
+    (ctx.verbose ? captured(result, ctx.codex, args, ctx) : ''));
 }
 export function manifest(root) {
   const value = JSON.parse(fs.readFileSync(path.join(root, '.codex-plugin/plugin.json'), 'utf8'));
@@ -102,9 +141,8 @@ export function identity(root) {
   return digest.digest('hex');
 }
 export function listing(ctx) {
-  const result = checked(ctx.codex, ['plugin', 'list', '--json'], ctx, {timeout: 30_000});
-  const value = parseJSON(result.stdout, 'Codex plugin list');
-  if (!Array.isArray(value.installed)) throw new Error('Unsupported Codex plugin listing format. Update Codex CLI.');
+  const value = codexJSON(ctx, ['plugin', 'list', '--json'], 'Codex plugin list');
+  if (!value || !Array.isArray(value.installed)) throw new Error('Unsupported Codex plugin listing format. Update Codex CLI.');
   return value.installed;
 }
 export function installed(ctx, records, selector = 'claim-verifier@personal') {
@@ -122,7 +160,7 @@ export function bridge(ctx, command, installation = {}, extra = []) {
   if (!result.stdout || result.status !== 0) {
     let message = 'Claim Verifier diagnostics could not run. Rerun with --verbose.';
     try { message = JSON.parse(result.stdout).error || message; } catch {}
-    if (ctx.verbose && result.stderr) message += `\n${result.stderr.slice(0, 4000)}`;
+    if (ctx.verbose && result.stderr) message += `\n${diagnosticText(result.stderr, ctx)}`;
     throw new Error(message);
   }
   const value = parseJSON(result.stdout, 'Claim Verifier diagnostics');
@@ -136,5 +174,9 @@ export function renderDoctor(status, output, verbose = false) {
   }
   output(`\n${status.status}`);
   for (const item of [...status.errors, ...status.attention]) output(item);
-  if (verbose) output(JSON.stringify(status, null, 2));
+  if (verbose) {
+    output('\nHooks');
+    for (const hook of ['UserPromptSubmit', 'PostToolUse', 'Stop']) output(`${status.hooks_seen?.includes(hook) ? '✓' : '✗'} ${hook}`);
+    output(JSON.stringify(status, null, 2));
+  }
 }

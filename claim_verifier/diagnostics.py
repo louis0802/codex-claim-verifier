@@ -286,5 +286,7 @@ def latest_audit(*, tagged: bool = False) -> dict | None:
         "claims": [{"claim": redact(str(item.get("claim", "")), 250), "type": item.get("type", ""),
                     "status": item.get("status", ""), "decision": item.get("decision", "")}
                    for item in audit.get("claims", [])],
-        "footer_channel": audit.get("footer", {}).get("channel"),
+        "footer_channel": (audit.get("footer") or {}).get("channel"),
+        "footer": {key: value for key, value in (audit.get("footer") or {}).items()
+                   if key in {"style", "rendered", "delivery", "channel"} and isinstance(value, str)},
     }

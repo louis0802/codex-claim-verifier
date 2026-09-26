@@ -21,11 +21,18 @@ AMBIGUOUS = re.compile(r"\b(?:verified|fully verified|everything works|no regres
 NEGATED = re.compile(r"\b(?:did not|didn't|have not|haven't|could not|couldn't|not yet|unable to|failed to)\b", re.I)
 
 
+# Narrow epistemic disclosures: these do not assert the embedded proposition.
+UNCERTAIN = re.compile(r"^(?:I|we) (?:cannot|can't|could not|couldn't|am unable to|are unable to) verify\b", re.I)
+META_VERIFICATION = re.compile(
+    r"^(?:the (?:requested closing text|following statement) is (?:not a verified result|unverified)"
+    r"|claim verifier (?:marked|classified|reported) (?:this|that|the statement) as \w+)[.:]?$", re.I)
+
+
 def extract(answer: str) -> tuple[list[dict], list[str]]:
     claims, ambiguous = [], []
-    for raw in re.split(r"(?<=[.!?])\s+|\n+|\s+\bbut\b\s+|\s+\bhowever\b\s+", answer, flags=re.I):
+    for raw in re.split(r"(?<=[.!?])\s+|\n+|;\s*|,\s+and\s+|\s+\bbut\b\s+|\s+\bhowever\b\s+", answer, flags=re.I):
         sentence = raw.strip().lstrip("-* ")
-        if not sentence or NEGATED.search(sentence):
+        if not sentence or NEGATED.search(sentence) or UNCERTAIN.search(sentence):
             continue
         found = False
         for kind, pattern in PATTERNS:
@@ -36,7 +43,7 @@ def extract(answer: str) -> tuple[list[dict], list[str]]:
                     claim["path"] = match.group(1)
                 claims.append(claim)
                 found = True
-        if not found and AMBIGUOUS.search(sentence):
+        if not found and not META_VERIFICATION.fullmatch(sentence) and AMBIGUOUS.search(sentence):
             ambiguous.append(sentence)
     return claims, ambiguous
 

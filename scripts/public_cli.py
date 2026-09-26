@@ -86,7 +86,7 @@ def doctor(installation: dict) -> dict:
     return {"status": status, "exit_code": 0 if ready else 2 if errors else 1,
             "installation": package, "configuration": config_ok, "audit_storage": storage_ok,
             "hook_activity": "OBSERVED" if current_activity and seen else "NOT_OBSERVED",
-            "hooks_observed": hooks_ok, "audit_generation": audit_ok, "hook_trust": "UNKNOWN",
+            "hooks_seen": seen, "hooks_observed": hooks_ok, "audit_generation": audit_ok, "hook_trust": "UNKNOWN",
             "version": installation.get("version"), "config_schema": SCHEMA,
             "errors": errors, "attention": attention}
 
@@ -104,7 +104,8 @@ def main():
     elif args.command == "doctor":
         result = doctor(installation)
     elif args.command == "audit-latest":
-        result = {"text": render_audit(latest_audit())}
+        audit = latest_audit()
+        result = {"text": render_audit(audit), "audit": audit}
     else:
         audits = [{"session": state["session_id"][:12], "timestamp": audit.get("timestamp"),
                    "result": audit.get("result")} for state in read_ledgers() for audit in state.get("audits", [])]

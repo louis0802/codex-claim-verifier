@@ -23,6 +23,15 @@ def render(audit: dict | None) -> str:
         lines.append("None inspected")
     for claim in audit["claims"]:
         lines.append(f"{'✓' if claim['status'] == 'VERIFIED' else '✗'} {claim['claim']} — {claim['status']} ({claim['decision']})")
+    footer = audit.get("footer") or {}
+    lines.extend(["", "Receipt", "", footer.get("rendered") or "Not available for this audit."])
+    if footer.get("rendered"):
+        channel = footer.get("channel")
+        if channel not in {"systemMessage", "continuation-reason"}:
+            channel = "stored only"
+        lines.extend(["", "Receipt delivery", channel,
+                      "Delivery attempted; visible client rendering is not confirmed." if channel != "stored only"
+                      else "Stored only; no delivery channel recorded."])
     return "\n".join(lines)
 
 
