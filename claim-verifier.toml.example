@@ -1,0 +1,21 @@
+[claim_verifier]
+enabled = true
+level = "receipts"
+enforcement = "report"
+max_repair_attempts = 2
+
+[claim_verifier.model]
+enabled = true
+model = "gpt-6-luna"
+reasoning_effort = "max"
+only_for_ambiguous_claims = true
+
+[claim_verifier.footer]
+enabled = true
+style = "adaptive" # compact, detailed, failures-only, adaptive
+delivery = "auto" # auto, system-message, problems-only; native is not supported yet
+show_level = true
+show_enforcement = false
+show_model = false
+show_evidence = false
+max_claims = 5

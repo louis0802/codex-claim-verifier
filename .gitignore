@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+*.log
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+.env
+.env.*
+plugin-data/
+audits/
+ledgers/
+*.tmp
+*.bak
+*.tgz
+*.zip

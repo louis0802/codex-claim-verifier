@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {"type": "string", "enum": ["TEST_SUCCESS", "BUILD_SUCCESS", "LINT_SUCCESS", "TYPECHECK_SUCCESS", "FILE_READ", "FILE_MODIFIED", "FILE_CREATED", "FILE_DELETED", "INSPECTION_PERFORMED", "GIT_COMMIT_CREATED", "GIT_PUSH_COMPLETED", "PR_CREATED", "DEPLOYMENT_COMPLETED", "GENERIC_VERIFIED", "GENERIC_COMPLETED", "COMPATIBILITY_VERIFICATION"]},
+          "text": {"type": "string"}
+        },
+        "required": ["type", "text"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["claims"],
+  "additionalProperties": false
+}

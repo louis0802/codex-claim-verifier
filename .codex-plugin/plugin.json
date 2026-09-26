@@ -1,0 +1,36 @@
+{
+  "name": "claim-verifier",
+  "version": "0.2.0",
+  "description": "Evidence-backed execution claim verification for OpenAI Codex.",
+  "author": {
+    "name": "Louis",
+    "url": "https://github.com/louis0802"
+  },
+  "interface": {
+    "displayName": "Codex Claim Verifier",
+    "shortDescription": "Check execution claims against tool evidence.",
+    "longDescription": "Records supported tool outcomes and checks Codex final claims with configurable verification levels and repair requests.",
+    "developerName": "Louis",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Explain what Claim Verifier checked in this task."
+    ],
+    "websiteURL": "https://github.com/louis0802/codex-claim-verifier"
+  },
+  "homepage": "https://github.com/louis0802/codex-claim-verifier#readme",
+  "repository": "https://github.com/louis0802/codex-claim-verifier",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "openai",
+    "ai-agents",
+    "agent-reliability",
+    "verification",
+    "hooks",
+    "developer-tools"
+  ]
+}

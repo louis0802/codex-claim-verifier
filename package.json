@@ -1,0 +1,47 @@
+{
+  "name": "claim-verifier",
+  "version": "0.2.0",
+  "description": "Evidence-backed execution claim verification for OpenAI Codex.",
+  "type": "module",
+  "bin": {
+    "claim-verifier": "cli/index.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "cli/",
+    ".codex-plugin/",
+    "claim_verifier/*.py",
+    "claim_verifier/*.json",
+    "hooks/",
+    "scripts/*.py",
+    "claim-verifier.toml.example",
+    "LICENSE",
+    "THIRD_PARTY.md"
+  ],
+  "scripts": {
+    "test": "node --test tests/setup/*.test.mjs",
+    "test:python": "python3 -m unittest discover -s tests -v",
+    "check": "node --check cli/index.mjs && node --check cli/setup.mjs && node --check hooks/run.mjs && node --check cli/system.mjs && node --check cli/python.mjs"
+  },
+  "license": "MIT",
+  "author": "Louis",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/louis0802/codex-claim-verifier.git"
+  },
+  "homepage": "https://github.com/louis0802/codex-claim-verifier#readme",
+  "bugs": {
+    "url": "https://github.com/louis0802/codex-claim-verifier/issues"
+  },
+  "keywords": [
+    "codex",
+    "openai",
+    "ai-agents",
+    "agent-reliability",
+    "verification",
+    "hooks",
+    "developer-tools"
+  ]
+}
