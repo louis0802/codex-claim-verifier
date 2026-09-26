@@ -39,3 +39,13 @@ pushing the tag. Create the GitHub pre-release and four issues using authenticat
 tools if available. Public source and asset downloads must match local evidence.
 Any defect found after publication uses a new patch release; never rewrite the
 published tag. No npm publication or CI trust interaction is permitted.
+
+## Final execution notes
+
+Publishing used authenticated GitHub REST APIs with an existing environment token;
+Git source/tag delivery used the exact requested SSH remote. Draft retrieval used
+the authenticated releases listing because the tag-specific release endpoint can
+omit drafts. Uploaded assets were validated before publishing, then downloaded
+without authentication for final comparison. Public npx and pinned Git marketplace
+smoke passed in fresh isolated homes. Only evidence documents changed after
+publication; the tag and packaged source remain immutable.

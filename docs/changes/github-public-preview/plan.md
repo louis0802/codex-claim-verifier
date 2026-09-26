@@ -16,13 +16,21 @@
    and release notes, pack the final source, hash the asset (A1–A5). **Complete:** 31 package files, final source match,
    retained notices, checksum and release notes ready.
 6. Initialize/stage/review Git, check whitespace, commit the exact requested
-   message, configure exact remote, push main, compare HEAD, tag and push (A6).
+   message, configure exact remote, push main, compare HEAD, tag and push (A6). **Complete:**
+   initial commit aa4a884; remote and annotated tag verified; staged checks passed.
 7. Publish GitHub pre-release, tarball/checksum, metadata/topics, and four platform
-   tracking issues (A7). Authenticated access is a dependency.
+   tracking issues (A7). **Complete:** published pre-release, both assets/digests
+   verified, public metadata/topics set, issues #1–#4 created via REST API.
 8. Test installation from the public asset and verify its hash against the local
-   release. Report manual trust/live claim/READY acceptance as pending (A8).
+   release. Report manual trust/live claim/READY acceptance as pending (A8). **Complete:** real
+   public tarball and pinned Git marketplace installation passed; unauthenticated
+   asset downloads match. See [distribution.md](distribution.md). Manual acceptance
+   remains explicitly pending under the Public Preview scope.
 
 Keep the original workspaces unchanged. Test files, logs, npm caches, and isolated
 Codex installations stay outside the public repository. Keep packaging files
 required by the plugin. Optional CI may be deferred to avoid expanding release
 scope. The license decision gates publication; failed checks gate commit/push.
+
+The only post-publication source changes are release evidence documents. The
+v0.2.0 tag, assets, packaged files, and runtime code remain unchanged.

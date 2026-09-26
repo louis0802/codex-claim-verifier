@@ -33,9 +33,8 @@ staging/identity and GitHub-only diagnostic wording.
 ## Distribution and live acceptance
 
 Public transport is tested after GitHub publication; the tagged source cannot
-record a completed post-publication result in advance. A subsequent public
-distribution record will contain exact tag/asset hashes and the observed HTTPS
-and Git marketplace results. The v0.2.0 tag and asset will not be rewritten.
+record a completed post-publication result in advance. The [public distribution record](distribution.md) now contains exact tag/asset
+hashes and the successful actual HTTPS and pinned Git marketplace results. The v0.2.0 tag and asset will not be rewritten.
 
 Manual `/hooks` review, a fresh trusted fake claim (`TEST_SUCCESS / UNVERIFIED /
 CORRECT`), a successful checked-run claim (`TEST_SUCCESS / VERIFIED / PASS`), and

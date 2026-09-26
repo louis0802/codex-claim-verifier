@@ -22,4 +22,6 @@ Release preparation will rebuild the asset after public metadata changes.
 
 The user selected MIT, copyright 2026 Louis. The project license and upstream
 notices are included in both the npm package and installed plugin payload. Repository existence has been verified:
-the requested public repository is currently empty.
+the requested public repository was empty when inspected. The cleaned source,
+annotated tag, pre-release, both assets, and four issues are now published;
+[public distribution verification](distribution.md) passed.
