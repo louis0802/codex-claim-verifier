@@ -1,6 +1,6 @@
 # v0.2.1 verification
 
-Status: local candidate; release gated on fresh trusted CLI acceptance.
+Status: prepublication verification complete; public distribution verification follows release.
 Host: macOS arm64, Node 24.13.1, Python 3.11.5. Baseline main equals origin/main
 83475d896458ff5c08f1fef508608d99a44b31a2; v0.2.0 differs only in historical release docs.
 
@@ -42,7 +42,10 @@ preserved config bytes and mtime and reports WAITING FOR HOOK REVIEW.
 
 ## Live acceptance
 
-See live-acceptance.md. User-reported prior fake-claim evidence is distinct from
-fresh v0.2.1 execution. Human review, authentic checked-run VERIFIED/PASS, all
-hooks and doctor READY remain publication gates. Desktop and physical x64 remain
-pending. Native final-answer insertion is not implemented. npm is unpublished.
+See live-acceptance.md for actual 2026-09-27 output, user-confirmed review and
+sandbox distinctions. Fresh stable CLI checked-run: 33 Node tests pass, current
+runtime TEST_SUCCESS VERIFIED/PASS, all three hooks, doctor READY. Separate fresh
+no-evidence fixture: UNVERIFIED/CORRECT, prompt/Stop only as expected.
+Stored receipt text and JSON agree. systemMessage visibility was not established.
+User-reported prior evidence remains attributed separately. Desktop and physical
+x64 remain pending; native final insertion unsupported. No npm publication.

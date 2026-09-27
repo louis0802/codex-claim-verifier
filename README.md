@@ -4,7 +4,7 @@ Evidence-backed execution claim verification for OpenAI Codex.
 
 **v0.2.1 — Public Preview.** Distributed through GitHub; **not published to npm**.
 Manual hook trust, trusted-session acceptance, and live Desktop verification
-remain pending. See [Known limitations](#known-limitations).
+are recorded separately below. See [Known limitations](#known-limitations).
 
 ## What it does
 
@@ -259,8 +259,8 @@ Keep sensitive material out of test prompts and command arguments.
 ## Known limitations
 
 - **Hook trust:** installation does not trust lifecycle hooks. Manual `/hooks`
-  review is required. A prior fake-claim case is user-reported; fresh v0.2.1
-  checked-run acceptance and doctor READY remain pending.
+  review is required for each applicable update. Manual review, fresh fake-claim
+  and checked-run acceptance, and doctor READY were verified on stable CLI 0.157.1.
 - **Bash exit status:** some plain Codex Bash hook results omit it. Authoritative
   test/build/lint/typecheck evidence may require the agent-invoked `checked_run`
   helper. From the installed plugin root, use
@@ -290,7 +290,9 @@ Portable Python pins and retained upstream notices are in [THIRD_PARTY.md](THIRD
 Automated baseline for this candidate: **96 passing tests** (63 Python, 33 Node).
 Local distribution checks passed separately on stable Codex 0.157.1 and alpha
 0.158.0-alpha.2.1, including a public 0.2.0 → local 0.2.1 upgrade. Public 0.2.1
-download verification and fresh trusted CLI acceptance remain pending. Desktop
+download verification follows publication. Trusted stable CLI acceptance passed:
+manual hook review, fake claim UNVERIFIED/CORRECT, checked-run VERIFIED/PASS, all
+three hooks observed, and doctor READY. Desktop
 trusted lifecycle remains pending; these are distinct from automated coverage.
 
 ```sh
@@ -313,9 +315,9 @@ After manual trust, use a fresh task for each live acceptance case:
    `TEST_SUCCESS`, `VERIFIED`, and `PASS` when they succeed.
 3. Run doctor after all three hooks and a Stop audit. Expect `READY`.
 
-The prior fake-claim case is recorded as user-reported evidence. Fresh v0.2.1
-trusted checked-run and READY checks are pending. Synthetic tests establish verifier
-logic, not Codex trust or live client delivery.
+These cases passed in fresh trusted v0.2.1 sessions on Codex CLI 0.157.1; see
+[actual live evidence](docs/changes/claim-verifier-0.2.1/live-acceptance.md).
+Synthetic tests establish verifier logic, not Codex trust or visible client delivery.
 
 ## License
 

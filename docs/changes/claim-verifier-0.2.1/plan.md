@@ -6,7 +6,7 @@
 - [x] Implement focused JSON diagnostics, audit visibility and extraction changes; bump version and README.
 - [x] Run full tests, syntax, plugin validation and diff review; record exact counts.
 - [x] Pack/inspect 0.2.1; stable fresh-install and public 0.2.0 upgrade smoke (A1/A4), alpha separately.
-- [ ] Record user-reported fake case separately; perform authentic trusted checked-run and doctor (A5–A8), requiring human review when needed.
+- [x] Record user-reported fake case separately; perform authentic trusted checked-run and doctor (A5–A8), requiring human review when needed.
 - [ ] Synchronize evidence/docs; logical commits, merge main, immutable tag and GitHub prerelease with checksum after gates pass. Public upgrade verification; no npm publication.
 
 Risks: real client startup differs from fixtures; output can contain secrets; runtime identity changes require review; authenticated live execution may need user interaction. Optional mutation reconciliation and helper-path feedback are excluded unless evidence shows necessary.
@@ -24,7 +24,12 @@ hook definitions and checked-run helper match v0.2.0 byte for byte.
 
 The candidate is installed globally via normal setup --upgrade; config bytes and
 mtime preserved. Setup reports WAITING FOR HOOK REVIEW for the changed identity.
-Human review was requested; no trust records or bypass flags were used. Release
-and main merge remain gated. Draft release notes/checksum are outside the repo.
+Human review was requested at that stage; no trust records or bypass flags were
+used. The subsequent successful live acceptance is recorded below. Draft release notes/checksum are outside the repo.
 Optional mutation reconciliation was unnecessary: marketplace-add ambiguity fails
 with inspection guidance, while plugin-add is followed by a state check.
+
+Human review confirmed 2026-09-27. Fresh real stable CLI sessions passed both
+fake-claim and checked-run acceptance. All hooks observed and doctor READY in
+actual user environment. See live-acceptance.md for the unsuccessful read-only
+attempt and successful workspace-write rerun. All prepublication gates now pass.
