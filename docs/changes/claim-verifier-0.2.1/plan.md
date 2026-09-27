@@ -7,7 +7,7 @@
 - [x] Run full tests, syntax, plugin validation and diff review; record exact counts.
 - [x] Pack/inspect 0.2.1; stable fresh-install and public 0.2.0 upgrade smoke (A1/A4), alpha separately.
 - [x] Record user-reported fake case separately; perform authentic trusted checked-run and doctor (A5–A8), requiring human review when needed.
-- [ ] Synchronize evidence/docs; logical commits, merge main, immutable tag and GitHub prerelease with checksum after gates pass. Public upgrade verification; no npm publication.
+- [x] Synchronize evidence/docs; logical commits, merge main, immutable tag and GitHub prerelease with checksum after gates pass. Public upgrade verification; no npm publication.
 
 Risks: real client startup differs from fixtures; output can contain secrets; runtime identity changes require review; authenticated live execution may need user interaction. Optional mutation reconciliation and helper-path feedback are excluded unless evidence shows necessary.
 
@@ -33,3 +33,8 @@ Human review confirmed 2026-09-27. Fresh real stable CLI sessions passed both
 fake-claim and checked-run acceptance. All hooks observed and doctor READY in
 actual user environment. See live-acceptance.md for the unsuccessful read-only
 attempt and successful workspace-write rerun. All prepublication gates now pass.
+
+Published v0.2.1 as a GitHub prerelease after gates passed. Unauthenticated assets
+match the checksum; public fresh install, pinned marketplace and 0.2.0 upgrade all
+pass. A1–A10 are satisfied with automated/distribution/live evidence distinguished.
+See distribution.md. npm untouched; Desktop and physical x64 remain explicit limits.

@@ -290,7 +290,8 @@ Portable Python pins and retained upstream notices are in [THIRD_PARTY.md](THIRD
 Automated baseline for this candidate: **96 passing tests** (63 Python, 33 Node).
 Local distribution checks passed separately on stable Codex 0.157.1 and alpha
 0.158.0-alpha.2.1, including a public 0.2.0 → local 0.2.1 upgrade. Public 0.2.1
-download verification follows publication. Trusted stable CLI acceptance passed:
+download, fresh setup, pinned marketplace and upgrade checks also passed; see the
+[distribution record](docs/changes/claim-verifier-0.2.1/distribution.md). Trusted stable CLI acceptance passed:
 manual hook review, fake claim UNVERIFIED/CORRECT, checked-run VERIFIED/PASS, all
 three hooks observed, and doctor READY. Desktop
 trusted lifecycle remains pending; these are distinct from automated coverage.

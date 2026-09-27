@@ -1,6 +1,6 @@
 # v0.2.1 verification
 
-Status: prepublication verification complete; public distribution verification follows release.
+Status: released; automated, public distribution and trusted CLI acceptance verified separately.
 Host: macOS arm64, Node 24.13.1, Python 3.11.5. Baseline main equals origin/main
 83475d896458ff5c08f1fef508608d99a44b31a2; v0.2.0 differs only in historical release docs.
 
@@ -33,7 +33,8 @@ Both isolated upgrades preserved complete/block config bytes and mtime. Neither
 invented readiness or trust. Stable was obtained by actual @openai/codex@latest
 installation. No noisy startup happened in these real runs; simulated regressions
 cover it. The v0.2.1 input was local, v0.2.0 input was the public GitHub asset.
-Public v0.2.1 download/upgrade remains pending publication.
+Public v0.2.1 download, fresh setup, pinned marketplace and upgrade now pass;
+see distribution.md for postpublication evidence.
 
 npm pack uses a workspace-local cache (default cache was sandbox-inaccessible).
 31 files inspected against source; no private/generated/nested archives. Final candidate was repacked after review, all 31 files matched source, and
